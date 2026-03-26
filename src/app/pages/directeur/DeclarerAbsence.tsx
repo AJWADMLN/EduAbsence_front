@@ -55,7 +55,7 @@ export default function DeclarerAbsence() {
   );
 
   const alreadyAbsent = Boolean(
-    selected && absences.some(a => a.enseignantPpr === selected && a.dateAbsence === date && a.quart === quart)
+    selected && absences.some(a => a.enseignantPpr === selected && a.dateAbsence === date)
   );
 
   const selectedEns  = myTeachers.find(e => e.ppr === selected);
@@ -69,7 +69,7 @@ export default function DeclarerAbsence() {
 
   const handleQuartChange = (q: QuartValue) => { setQuart(q); setPeriode(Math.min(periode, QUARTS.find(x => x.value === q)!.end - QUARTS.find(x => x.value === q)!.start)); };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!selected) { setError("Veuillez sélectionner un enseignant."); return; }
@@ -78,18 +78,22 @@ export default function DeclarerAbsence() {
       setError("La journée du " + new Date(date + "T00:00:00").toLocaleDateString("fr-FR") + " a été validée. Vous ne pouvez plus déclarer d'absences pour cette date.");
       return;
     }
-    if (alreadyAbsent) { setError("Cet enseignant est déjà déclaré absent pour ce quart à cette date."); return; }
+    if (alreadyAbsent) { setError("Cet enseignant a déjà une absence enregistrée pour ce jour."); return; }
 
-    addAbsence({
-      enseignantPpr: Number(selected),
-      etaId:         currentUser?.etaId ?? 0,
-      dateAbsence:   date,
-      quart,
-      periode,
-    });
-
-    setSuccess(true);
-    setTimeout(() => { setSuccess(false); setSelected(0); setSearch(""); setDate(today); }, 3500);
+    try {
+      await addAbsence({
+        enseignantPpr: Number(selected),
+        etaId:         currentUser?.etaId ?? 0,
+        dateAbsence:   date,
+        quart,
+        periode,
+      });
+      setSuccess(true);
+      setTimeout(() => { setSuccess(false); setSelected(0); setSearch(""); setDate(today); }, 3500);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Une erreur est survenue.";
+      setError(msg);
+    }
   };
 
   const todayLocked = isLocked(currentUser?.etaId, today);
@@ -278,7 +282,7 @@ export default function DeclarerAbsence() {
               {alreadyAbsent ? (
                 <span className="flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  {selectedEns?.prenom} {selectedEns?.nom} est déjà déclaré(e) absent(e) pour ce quart à cette date.
+                  {selectedEns?.prenom} {selectedEns?.nom} a déjà une absence enregistrée pour ce jour.
                 </span>
               ) : (
                 <span>
