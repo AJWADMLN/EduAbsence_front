@@ -1,6 +1,6 @@
 import type { Enseignant, Absence, Etablissement } from "../app/context/AppContext";
 
-const API_URL = "https://unmulish-accusatively-tomoko.ngrok-free.dev";
+const API_URL = "https://unmulish-accusatively-tomoko.ngrok-free.dev/api";
 
 // ── Response interfaces matching backend shapes ────────────────────────────────
 
@@ -111,6 +111,7 @@ class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "69420",
       ...options.headers,
     };
 
