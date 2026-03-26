@@ -1,6 +1,6 @@
 import type { Enseignant, Absence, Etablissement } from "../app/context/AppContext";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://unmulish-accusatively-tomoko.ngrok-free.dev";
 
 // ── Response interfaces matching backend shapes ────────────────────────────────
 
